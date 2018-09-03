@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.28010.2003
+VisualStudioVersion = 15.0.28010.2016
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MeshApp", "WebApplication1\MeshApp.csproj", "{180A75FE-A25F-4816-984A-1C9680F1DF76}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Web.UI", "Web.UI\Web.UI.csproj", "{180A75FE-A25F-4816-984A-1C9680F1DF76}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -20,6 +20,6 @@ Global
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0C080905-0412-4D68-BBED-0DD4B9154086}
+		SolutionGuid = {946B4C50-8E94-460F-8EE1-EDF4D95D26FD}
 	EndGlobalSection
 EndGlobal
