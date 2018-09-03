@@ -1,0 +1,178 @@
+﻿<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html>
+<head>
+    <title>Visualizzazione</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="css/bootstrap.min.css" rel="stylesheet" />
+    <script src="js/jquery-3.2.1.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/three.min.js"></script>
+    <script src="js/STLLoader.js"></script>
+    <script src="js/Detector.js"></script>
+    <!--<script src="js/stats.min.js"></script>-->
+    <script src="js/OrbitControls.js"></script>
+    <style type="text/css">
+        .col-md-4 {
+            color: red;
+            line-height: 1.5em;
+            border: 1px solid white;
+        }
+    </style>
+</head>
+<body>
+    <script type="text/javascript">
+        $(function () {
+            if (!Detector.webgl)
+                Detector.addGetWebGLMessage();
+            var container, stats, label, dim, nm, row, back, backC;
+            var camera, controls, cameraTarget, scene, renderer;
+            init();
+            animate();
+            function init() {
+                container = document.createElement('div');
+                container.setAttribute('class', 'container');
+                row = document.createElement('div');
+                row.setAttribute('class', 'row');
+                dim = document.createElement('div');
+                dim.setAttribute('Id', 'dim');
+                dim.setAttribute('class', 'col-md-4');
+                nm = document.createElement('div');
+                nm.setAttribute('Id', 'nm');
+                nm.setAttribute('class', 'col-md-4');
+                backC = document.createElement('div');
+                backC.setAttribute('class', 'col-md-4');
+                back = document.createElement('a');
+                back.setAttribute('href', 'Index.html');
+                back.innerText = 'vai a Index';
+                backC.setAttribute('style', 'margin-top: 1.5em;');
+                backC.appendChild(back);
+                row.appendChild(nm);
+                row.appendChild(dim);
+                row.appendChild(backC);
+                container.appendChild(row);
+                document.body.appendChild(container);
+ camera = new THREE.OrthographicCamera(-2, 3, 2, -2, 1, 1500);
+                camera.position.set(0, 0.25, 7);
+                cameraTarget = new THREE.Vector3(0, -0.25, 0);
+                controls = new THREE.OrbitControls(camera);
+                controls.addEventListener('change', render);
+                scene = new THREE.Scene();
+                scene.fog = new THREE.Fog(0x72645b, 2, 15);
+
+                var loader = new THREE.STLLoader();
+                var imgName = document.location.toString().split("=")[document.location.toString().split("=").length - 1];
+                var img = './images/' + imgName;
+
+                loader.load(img, function (geometry) {
+                    var material = new THREE.MeshPhongMaterial({ color: 0xAAAAAA, specular: 0x111111, shininess: 200 });
+
+                    var xmax = Number.NEGATIVE_INFINITY;
+                    var ymax = Number.NEGATIVE_INFINITY;
+                    var zmax = Number.NEGATIVE_INFINITY;
+                    var xmim = Number.POSITIVE_INFINITY;
+                    var ymim = Number.POSITIVE_INFINITY;
+                    var zmim = Number.POSITIVE_INFINITY;
+                    var volume = 0;
+                    var a, b, c;
+                    for (i = 0; i < geometry.vertices.length; i++) {
+                        if (geometry.vertices[i] === null || Number.isNaN(geometry.vertices[i].x) || Number.isNaN(geometry.vertices[i].y) || Number.isNaN(geometry.vertices[i].z))
+                            continue;
+                        xmax = geometry.vertices[i].x > xmax ? geometry.vertices[i].x : xmax;
+                        ymax = geometry.vertices[i].y > ymax ? geometry.vertices[i].y : ymax;
+                        zmax = geometry.vertices[i].z > zmax ? geometry.vertices[i].z : zmax;
+                        xmim = geometry.vertices[i].x < xmim ? geometry.vertices[i].x : xmim;
+                        ymim = geometry.vertices[i].y < ymim ? geometry.vertices[i].y : ymim;
+                        zmim = geometry.vertices[i].z < zmim ? geometry.vertices[i].z : zmim;
+                    }
+
+                    for (i = 0; i < geometry.faces.length; i++) {
+                        if (geometry.faces[i] === null)
+                            continue;
+                        a = geometry.vertices[geometry.faces[i].a];
+                        b = geometry.vertices[geometry.faces[i].b];
+                        c = geometry.vertices[geometry.faces[i].c];
+                        volume += a.x * b.y * c.z + a.y * b.z * c.x + a.z * b.x * c.y - a.x * b.z * c.y - a.y * b.x * c.z - a.z * b.y * c.x;
+                    }
+                    //geometry.computeBoundingSphere(); //geometry.computeBoundingBox();
+
+                    document.getElementById('dim').innerText = 'Larghezza: ' + (xmax - xmim).toPrecision(3) + ' mm\n' + 'Altezza: ' + (ymax - ymim).toPrecision(3) + ' mm\n' + 'Profondità : ' + (zmax - zmim).toPrecision(3) + ' mm';
+                    document.getElementById('nm').innerText = 'File: ' + imgName + ' \n' + 'Volume della sfera esterna: ' + (4 * Math.pow(geometry.boundingSphere.radius, 3) / 3).toPrecision(3) + ' mm^3' + ' \n' + 'Volume approssimato: ' + (volume / 6).toPrecision(3) + ' mm^3';
+
+                    var mesh = new THREE.Mesh(geometry, material);
+
+                    mesh.position.set(0, - 0.37, - 0.6);
+                    mesh.rotation.set(- Math.PI / 2, 0, 0);
+                    mesh.scale.set(1, 1, 1);
+
+                    mesh.castShadow = true;
+                    mesh.receiveShadow = true;
+
+                    scene.add(mesh);
+
+                });
+
+                // Lights
+                scene.add(new THREE.HemisphereLight(0x443333, 0x111122));
+                addShadowedLight(1, 1, 1, 0xffffff, 1.35);
+                addShadowedLight(0.5, 1, -1, 0xffaa00, 1);
+                // renderer
+                renderer = new THREE.WebGLRenderer({ antialias: true });
+                renderer.setClearColor(scene.fog.color);
+                renderer.setPixelRatio(window.devicePixelRatio);
+                renderer.setSize(window.innerWidth, window.innerHeight);
+                renderer.gammaInput = true;
+                renderer.gammaOutput = true;
+                renderer.shadowMap.enabled = true;
+                renderer.shadowMap.cullFace = THREE.CullFaceBack;
+                document.body.appendChild(renderer.domElement);
+                //// stats
+                //stats = new Stats();
+                //stats.domElement.style.position = 'absolute';
+                //stats.domElement.style.top = '0px';
+                //container.appendChild(stats.domElement);
+                //
+                window.addEventListener('resize', onWindowResize, false);
+            }
+            function addShadowedLight(x, y, z, color, intensity) {
+                var directionalLight = new THREE.DirectionalLight(color, intensity);
+                directionalLight.position.set(x, y, z);
+                scene.add(directionalLight);
+                directionalLight.castShadow = false;
+                // directionalLight.shadowCameraVisible = true;
+                var d = 1;
+                directionalLight.shadowCameraLeft = -d;
+                directionalLight.shadowCameraRight = d;
+                directionalLight.shadowCameraTop = d;
+                directionalLight.shadowCameraBottom = -d;
+                directionalLight.shadowCameraNear = 1;
+                directionalLight.shadowCameraFar = 4;
+                directionalLight.shadowMapWidth = 1024;
+                directionalLight.shadowMapHeight = 1024;
+                directionalLight.shadowBias = -0.005;
+            }
+            function onWindowResize() {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            }
+            function animate() {
+                requestAnimationFrame(animate);
+                controls.update();
+                render();
+                //stats.update();
+            }
+            function render() {
+                camera.lookAt(cameraTarget);
+                renderer.render(scene, camera);
+            }
+        });
+    </script>
+</body>
+</html>
+
