@@ -57,7 +57,7 @@ and open the template in the editor.
                 row.appendChild(backC);
                 container.appendChild(row);
                 document.body.appendChild(container);
- camera = new THREE.OrthographicCamera(-2, 3, 2, -2, 1, 1500);
+                camera = new THREE.OrthographicCamera(-2, 3, 2, -2, 1, 1500);
                 camera.position.set(0, 0.25, 7);
                 cameraTarget = new THREE.Vector3(0, -0.25, 0);
                 controls = new THREE.OrbitControls(camera);
@@ -92,7 +92,7 @@ and open the template in the editor.
                     }
 
                     for (i = 0; i < geometry.faces.length; i++) {
-                        if ((geometry.faces[i] === null)|| (geometry.faces[i] === null) || (geometry.faces[i] === null) || (geometry.faces[i] === null))
+                        if (geometry.faces[i] === null || geometry.faces[i].a === null || geometry.faces[i].b === null || geometry.faces[i].c === null)
                             continue;
                         a = geometry.vertices[geometry.faces[i].a];
                         b = geometry.vertices[geometry.faces[i].b];
